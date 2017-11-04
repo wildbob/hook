@@ -2,10 +2,14 @@
 #include "func_hook.h"
 #include "interfaces.h"
 
+typedef void(__thiscall* paint_traverse_t)(PVOID, unsigned int, bool, bool);
+using create_move_t = void(__thiscall*)(i_client*, int, float, bool);
+
 namespace g_hooks
 {
-	extern bool __stdcall create_move(float frametime, c_cmd* pCmd);
+	extern void __stdcall create_move(int sequence_number, float input_sample_frametime, bool active, bool& bSendPacket);
 	extern void __stdcall create_move_proxy(int sequence_number, float input_sample_frametime, bool active);
+	extern void __stdcall paint_traverse(PVOID thisptr, int edx, unsigned int VGUIPanel, bool forceRepaint, bool allowForce);
 	//vfunc_hooks
 	extern vfunc_hook client_hook;
 	extern vfunc_hook d3d_hook;

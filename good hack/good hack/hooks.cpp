@@ -2,6 +2,7 @@
 #include "hooks.h"
 #include "csgo.h"
 #include "hack.h"
+#include "entity.h"
 
 namespace g_hooks
 {
@@ -21,8 +22,13 @@ namespace g_hooks
 		client_hook.setup(g_csgo.m_client);
 		client_mode_hook.setup(g_csgo.m_clientmode);	
 		engine_hook.setup(g_csgo.m_engine);
+		vgui_surface_hook.setup(g_csgo.m_surface);
+		panel_hook.setup(g_csgo.m_panel);
 	
+		//hooking
 		client_hook.hook_index(21, create_move_proxy);
+
+		panel_hook.hook_index(41, paint_traverse);
 	}
 
 	void destructor()
@@ -30,6 +36,8 @@ namespace g_hooks
 		client_hook.unhook_all();
 		client_mode_hook.unhook_all();
 		engine_hook.unhook_all();
+		vgui_surface_hook.unhook_all();
+		panel_hook.unhook_all();
 	}
 
 	__declspec(naked) void __stdcall create_move_proxy(int sequence_number, float input_sample_frametime, bool active)
@@ -51,13 +59,24 @@ namespace g_hooks
 		}
 	}
 
-	bool __stdcall create_move(float frametime, c_cmd* pCmd)
+	void __stdcall create_move(int sequence_number, float input_sample_frametime, bool active, bool& bSendPacket)
 	{
-		if (!pCmd)
-			return false;
+		auto ofunc = client_hook.get_original<create_move_t>(21);
 
-		if (!pCmd->command_number)
-			return false;
+		ofunc(g_csgo.m_client, sequence_number, input_sample_frametime, active);
+
+		auto local = c_entity::get_local_player();
+		auto cmd = g_csgo.m_input->GetUserCmd(0, sequence_number);
+		auto verified = g_csgo.m_input->GetVerifiedCmd(0, sequence_number);
+
+
+		if (!cmd || cmd->command_number == 0 || !local)
+			return;
+
+		auto weapon = local->get_active_weapon();;
+
+		if (!weapon)
+			return;
 
 
 		for (auto& hacks : g_hacks.m_hacks)
@@ -65,6 +84,20 @@ namespace g_hooks
 			hacks->tick();
 		}
 
+	}
+
+	void __stdcall paint_traverse(PVOID thisptr, int edx, unsigned int VGUIPanel, bool forceRepaint, bool allowForce)
+	{		
+		static auto ofunc = panel_hook.get_original<paint_traverse_t>(41);
+		ofunc(thisptr, VGUIPanel, forceRepaint, allowForce);
+
+		if (!strcmp("MatSystemTopPanel", g_csgo.m_panel->get_name(VGUIPanel)))
+		{
+			for (auto& hacks : g_hacks.m_hacks)
+			{
+				hacks->draw();
+			}
+		}
 	}
 }
 

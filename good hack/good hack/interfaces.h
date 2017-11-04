@@ -3,6 +3,8 @@
 #include "helpers.h"
 #include "vector.h"
 
+typedef ULONG HFont;
+
 //this is where all the interfaces are
 class i_net_channel
 {
@@ -1024,3 +1026,144 @@ public:
 	c_cmd m_cmd;
 	CRC32_t  m_crc;
 };
+
+
+class i_surface
+{
+public:
+	void draw_set_color(Color col)
+	{
+		typedef void(__thiscall *OrigFn)(void*, Color);
+		g_utils::get_v_func<OrigFn>(this, 14)(this, col);
+	}
+
+	void draw_filled_rect(int x0, int y0, int x1, int y1) {
+		typedef void(__thiscall *OrigFn)(void*, int, int, int, int);
+		g_utils::get_v_func<OrigFn>(this, 16)(this, x0, y0, x1, y1);
+	}
+
+	void draw_outlined_rect(int x0, int y0, int x1, int y1) {
+		typedef void(__thiscall *OrigFn)(void*, int, int, int, int);
+		g_utils::get_v_func<OrigFn>(this, 18)(this, x0, y0, x1, y1);
+	}
+	void get_cursor_pos(int& x, int& y)
+	{
+		typedef void(__thiscall *OrigFn)(PVOID, int&, int&);
+		g_utils::get_v_func<OrigFn>(this, 100)(this, x, y);
+	}
+	void draw_line(int x0, int y0, int x1, int y1) {
+		typedef void(__thiscall *OrigFn)(void*, int, int, int, int);
+		g_utils::get_v_func<OrigFn>(this, 19)(this, x0, y0, x1, y1);
+	}
+	void draw_outlined_circle(int x, int y, int radius, int segments)
+	{
+		typedef void(__thiscall *OrigFn)(PVOID, int, int, int, int);
+		g_utils::get_v_func<OrigFn>(this, 103)(this, x, y, radius, segments);
+	}
+	void draw_set_font(HFont font) {
+		typedef void(__thiscall *OrigFn)(void*, HFont);
+		g_utils::get_v_func<OrigFn>(this, 23)(this, font);
+	}
+
+	void draw_set_text_color(Color col) {
+		typedef void(__thiscall *OrigFn)(void*, Color);
+		g_utils::get_v_func<OrigFn>(this, 24)(this, col);
+	}
+
+	void draw_set_text_pos(int x, int y) {
+		typedef void(__thiscall *OrigFn)(void*, int, int);
+		g_utils::get_v_func<OrigFn>(this, 26)(this, x, y);
+	}
+
+	void draw_print_text(const wchar_t *text, int textLen, FontDrawType drawType = FontDrawType::FONT_DRAW_DEFAULT) {
+		typedef void(__thiscall *OrigFn)(void*, const wchar_t *, int, FontDrawType);
+		g_utils::get_v_func<OrigFn>(this, 28)(this, text, textLen, drawType);
+	}
+	void draw_unicode_string(const wchar_t *pwString, FontDrawType drawType = FontDrawType::FONT_DRAW_DEFAULT)
+	{
+		typedef void(__thiscall *OrigFn)(void*, const wchar_t *, FontDrawType);
+		g_utils::get_v_func<OrigFn>(this, 132)(this, pwString, drawType);
+	}
+	HFont create_font() {
+		typedef HFont(__thiscall *OrigFn)(void*);
+		return g_utils::get_v_func<OrigFn>(this, 71)(this);
+	}
+
+	bool set_font_glyph(HFont font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int nRangeMin = 0, int nRangeMax = 0) {
+		typedef bool(__thiscall *OrigFn)(void*, HFont, const char*, int, int, int, int, int, int, int);
+		return g_utils::get_v_func<OrigFn>(this, 72)(this, font, windowsFontName, tall, weight, blur, scanlines, flags, nRangeMin, nRangeMax);
+	}
+
+	void get_text_size(HFont font, const wchar_t *text, int &wide, int &tall) {
+		typedef void(__thiscall *OrigFn)(void*, HFont, const wchar_t *, int&, int&);
+		g_utils::get_v_func<OrigFn>(this, 79)(this, font, text, wide, tall);
+	}
+};
+
+
+class i_panel
+{
+public:
+	const char *get_name(unsigned int vguiPanel)
+	{
+		typedef const char *(__thiscall* OrigFn)(void*, unsigned int);
+		return g_utils::get_v_func<OrigFn>(this, 36)(this, vguiPanel);
+	}
+};
+
+#define MULTIPLAYER_BACKUP 150
+
+class bf_write;
+class bf_read;
+
+class i_input
+{
+public:
+	virtual void  Init_All(void);
+	virtual void  Shutdown_All(void);
+	virtual int   GetButtonBits(int);
+	virtual void  CreateMove(int sequence_number, float input_sample_frametime, bool active);
+	virtual void  ExtraMouseSample(float frametime, bool active);
+	virtual bool  WriteUsercmdDeltaToBuffer(bf_write *buf, int from, int to, bool isnewcommand);
+	virtual void  EncodeUserCmdToBuffer(bf_write& buf, int slot);
+	virtual void  DecodeUserCmdFromBuffer(bf_read& buf, int slot);
+
+
+	inline c_cmd* GetUserCmd(int nSlot, int sequence_number);
+	inline CVerifiedUserCmd* GetVerifiedCmd(int nSlot, int sequence_number);
+
+	bool                m_fTrackIRAvailable;            //0x04
+	bool                m_fMouseInitialized;            //0x05
+	bool                m_fMouseActive;                 //0x06
+	bool                m_fJoystickAdvancedInit;        //0x07
+	char                pad_0x08[0x2C];                 //0x08
+	void*               m_pKeys;                        //0x34
+	char                pad_0x38[0x64];                 //0x38
+	bool                m_fCameraInterceptingMouse;     //0x9C
+	bool                m_fCameraInThirdPerson;         //0x9D
+	bool                m_fCameraMovingWithMouse;       //0x9E
+	Vector              m_vecCameraOffset;              //0xA0
+	bool                m_fCameraDistanceMove;          //0xAC
+	int                 m_nCameraOldX;                  //0xB0
+	int                 m_nCameraOldY;                  //0xB4
+	int                 m_nCameraX;                     //0xB8
+	int                 m_nCameraY;                     //0xBC
+	bool                m_CameraIsOrthographic;         //0xC0
+	QAngle              m_angPreviousViewAngles;        //0xC4
+	QAngle              m_angPreviousViewAnglesTilt;    //0xD0
+	float               m_flLastForwardMove;            //0xDC
+	int                 m_nClearInputState;             //0xE0
+	char                pad_0xE4[0x8];                  //0xE4
+	c_cmd*           m_pCommands;                    //0xEC
+	CVerifiedUserCmd*   m_pVerifiedCommands;            //0xF0
+};
+
+c_cmd* i_input::GetUserCmd(int nSlot, int sequence_number)
+{
+	return &m_pCommands[sequence_number % MULTIPLAYER_BACKUP];
+}
+
+CVerifiedUserCmd* i_input::GetVerifiedCmd(int nSlot, int sequence_number)
+{
+	return &m_pVerifiedCommands[sequence_number % MULTIPLAYER_BACKUP];
+}

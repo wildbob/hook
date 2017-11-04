@@ -64,319 +64,245 @@ void inline SinCos(float radians, float sine, float cosine)
 		float	tex_x = 0.f;
 		float	tex_y = 0.f;
 	};
+	typedef float vec_t;
 	class Vector
 	{
 	public:
-		typedef float vec_t;
-		vec_t x, y, z;
-
-		Vector(void);
-		Vector(float X, float Y, float Z);
-		void Init(float ix = 0.0f, float iy = 0.0f, float iz = 0.0f);
-		float operator[](int i) const;
-		float& operator[](int i);
-		inline void Zero();
-		bool operator==(const Vector& v) const;
-		bool operator!=(const Vector& v) const;
-		inline bool operator!() { return !x && !y && !z; }
-		__forceinline Vector&	operator+=(const Vector &v);
-		__forceinline Vector&	operator-=(const Vector &v);
-		__forceinline Vector&	operator*=(const Vector &v);
-		__forceinline Vector&	operator*=(float s);
-		__forceinline Vector&	operator/=(const Vector &v);
-		__forceinline Vector&	operator/=(float s);
-		__forceinline Vector&	operator+=(float fl);
-		__forceinline Vector&	operator-=(float fl);
-		inline Vector NormalizeVec();
-		inline float	Length() const;
-		__forceinline float LengthSqr(void) const
+		Vector(void)
 		{
-			CHECK_VALID(*this);
+			Invalidate();
+		}
+
+		Vector(float X, float Y)
+		{
+			x = X;
+			y = Y;
+			z = 0;
+		}
+
+		Vector(float X, float Y, float Z)
+		{
+			x = X;
+			y = Y;
+			z = Z;
+		}
+
+		Vector(const float* clr)
+		{
+			x = clr[0];
+			y = clr[1];
+			z = clr[2];
+		}
+
+		void Init(float ix = 0.0f, float iy = 0.0f, float iz = 0.0f)
+		{
+			x = ix; y = iy; z = iz;
+		}
+		bool IsValid() const
+		{
+			return std::isfinite(x) && std::isfinite(y) && std::isfinite(z);
+		}
+		void Invalidate()
+		{
+			x = y = z = std::numeric_limits<float>::infinity();
+		}
+
+		float& operator[](int i)
+		{
+			return ((float*)this)[i];
+		}
+		float operator[](int i) const
+		{
+			return ((float*)this)[i];
+		}
+
+		void Zero()
+		{
+			x = y = z = 0.0f;
+		}
+		Vector Normalize()
+		{
+			Vector vector;
+			float length = this->Length();
+
+			if (length != 0)
+			{
+				vector.x = x / length;
+				vector.y = y / length;
+				vector.z = z / length;
+			}
+			else
+				vector.x = vector.y = 0.0f;
+			vector.z = 1.0f;
+
+			return vector;
+		}
+		bool operator==(const Vector& src) const
+		{
+			return (src.x == x) && (src.y == y) && (src.z == z);
+		}
+		bool operator!=(const Vector& src) const
+		{
+			return (src.x != x) || (src.y != y) || (src.z != z);
+		}
+
+		Vector& operator+=(const Vector& v)
+		{
+			x += v.x; y += v.y; z += v.z;
+			return *this;
+		}
+		Vector& operator-=(const Vector& v)
+		{
+			x -= v.x; y -= v.y; z -= v.z;
+			return *this;
+		}
+		Vector& operator*=(float fl)
+		{
+			x *= fl;
+			y *= fl;
+			z *= fl;
+			return *this;
+		}
+		Vector& operator*=(const Vector& v)
+		{
+			x *= v.x;
+			y *= v.y;
+			z *= v.z;
+			return *this;
+		}
+		Vector& operator/=(const Vector& v)
+		{
+			x /= v.x;
+			y /= v.y;
+			z /= v.z;
+			return *this;
+		}
+		Vector& operator+=(float fl)
+		{
+			x += fl;
+			y += fl;
+			z += fl;
+			return *this;
+		}
+		Vector& operator/=(float fl)
+		{
+			x /= fl;
+			y /= fl;
+			z /= fl;
+			return *this;
+		}
+		Vector& operator-=(float fl)
+		{
+			x -= fl;
+			y -= fl;
+			z -= fl;
+			return *this;
+		}
+
+		void NormalizeInPlace()
+		{
+			*this = Normalized();
+		}
+		Vector Normalized() const
+		{
+			Vector res = *this;
+			float l = res.Length();
+			if (l != 0.0f) {
+				res /= l;
+			}
+			else {
+				res.x = res.y = res.z = 0.0f;
+			}
+			return res;
+		}
+
+		float DistTo(const Vector &vOther) const
+		{
+			Vector delta;
+
+			delta.x = x - vOther.x;
+			delta.y = y - vOther.y;
+			delta.z = z - vOther.z;
+
+			return delta.Length();
+		}
+		float DistToSqr(const Vector &vOther) const
+		{
+			Vector delta;
+
+			delta.x = x - vOther.x;
+			delta.y = y - vOther.y;
+			delta.z = z - vOther.z;
+
+			return delta.LengthSqr();
+		}
+		float Dot(const Vector& vOther) const
+		{
+			return (x*vOther.x + y*vOther.y + z*vOther.z);
+		}
+		float Length() const
+		{
+			return sqrt(x*x + y*y + z*z);
+		}
+		float LengthSqr(void) const
+		{
 			return (x*x + y*y + z*z);
 		}
-		bool IsZero(float tolerance = 0.01f) const
+		float Length2D() const
 		{
-			return (x > -tolerance && x < tolerance &&
-				y > -tolerance && y < tolerance &&
-				z > -tolerance && z < tolerance);
+			return sqrt(x*x + y*y);
 		}
-		float	NormalizeInPlace();
-		__forceinline float	DistToSqr(const Vector &vOther) const;
-		float	Dot(const Vector& vOther) const;
-		float	Dots(const float* fOther) const;
-		float	Length2D(void) const;
-		float	Length2DSqr(void) const;
-		inline void Rotate2D(const float& f);
-		Vector& operator=(const Vector &vOther);
-		Vector	operator-(void) const;
-		Vector	operator+(const Vector& v) const;
-		Vector	operator-(const Vector& v) const;
-		Vector	operator*(const Vector& v) const;
-		Vector	operator/(const Vector& v) const;
-		Vector	operator*(float fl) const;
-		Vector	operator/(float fl) const;
-		// Base address...
-		float* Base();
-		float const* Base() const;
-		inline Vector Cross(Vector a) { return Vector(y*a.z - z*a.y, z*a.x - x*a.z, x*a.y - y*a.x); }
-		inline Vector Angle(Vector* up = 0)
+		inline vec_t Vector::Length2DSqr(void) const
 		{
-			if (!x && !y)
-				return Vector(0, 0, 0);
-
-			float roll = 0;
-
-			if (up)
-			{
-				Vector left = (*up).Cross(*this);
-
-				roll = deg(atan2f(left.z, (left.y * x) - (left.x * y)));
-			}
-
-			return Vector(deg(atan2f(-z, sqrt2(x*x + y*y))), deg(atan2f(y, x)), roll);
+			return (x * x + y * y);
 		}
-		inline bool IsValid() const
+		Vector& operator=(const Vector &vOther)
 		{
-			return (x == x && y == y && z == z);
-		}
-		Vector Direction()
-		{
-			return Vector(cos(y * M_PI / 180.0f) * cos(x * M_PI / 180.0f), sin(y * M_PI / 180.0f) * cos(x * M_PI / 180.0f), sin(-x * M_PI / 180.0f)).NormalizeVec();
+			x = vOther.x; y = vOther.y; z = vOther.z;
+			return *this;
 		}
 
-		inline Vector Forward()
+		Vector Vector::operator-(void) const
 		{
-			float sp, sy, cp, cy;
-
-			SinCos(rad(x), sp, cp);
-			SinCos(rad(y), sy, cy);
-
-			return Vector(cp*cy, cp*sy, -sp);
+			return Vector(-x, -y, -z);
 		}
-		inline Vector Right()
+		Vector Vector::operator+(const Vector& v) const
 		{
-			float sp, sy, sr, cp, cy, cr;
-
-			SinCos(rad(x), sp, cp);
-			SinCos(rad(y), sy, cy);
-			SinCos(rad(z), sr, cr);
-
-			return Vector(1 * sr*sp*cy + -1 * cr*-sy, -1 * sr*sp*sy + -1 * cr*cy, -1 * sr*cr);
+			return Vector(x + v.x, y + v.y, z + v.z);
 		}
-		inline Vector Up()
+		Vector Vector::operator-(const Vector& v) const
 		{
-			float sp, sy, sr, cp, cy, cr;
-
-			SinCos(rad(x), sp, cp);
-			SinCos(rad(y), sy, cy);
-			SinCos(rad(z), sr, cr);
-
-			return Vector(cr*sp*cy + -sr*-sy, cr*sp*sy + -sr*cy, cr*cp);
+			return Vector(x - v.x, y - v.y, z - v.z);
 		}
+		Vector Vector::operator*(float fl) const
+		{
+			return Vector(x * fl, y * fl, z * fl);
+		}
+		Vector Vector::operator*(const Vector& v) const
+		{
+			return Vector(x * v.x, y * v.y, z * v.z);
+		}
+		Vector Vector::operator/(float fl) const
+		{
+			return Vector(x / fl, y / fl, z / fl);
+		}
+		Vector Vector::operator/(const Vector& v) const
+		{
+			return Vector(x / v.x, y / v.y, z / v.z);
+		}
+
+		float x, y, z;
 	};
 
-	//===============================================
-	inline void Vector::Init(float ix, float iy, float iz)
+	inline Vector operator*(float lhs, const Vector& rhs)
 	{
-		x = ix; y = iy; z = iz;
-		CHECK_VALID(*this);
+		return rhs * lhs;
 	}
-	//===============================================
-	inline Vector::Vector(float X, float Y, float Z)
+	inline Vector operator/(float lhs, const Vector& rhs)
 	{
-		x = X; y = Y; z = Z;
-		CHECK_VALID(*this);
-	}
-	//===============================================
-	inline Vector::Vector(void) { }
-	//===============================================
-	inline void Vector::Zero()
-	{
-		x = y = z = 0.0f;
-	}
-	inline Vector operator*(float fl, const Vector& v)
-	{
-		return v * fl;
-	}
-	//===============================================
-	inline void VectorClear(Vector& a)
-	{
-		a.x = a.y = a.z = 0.0f;
-	}
-	inline void Vector::Rotate2D(const float &f)
-	{
-		float _x, _y;
-
-		float s, c;
-
-		SinCos(DEG2RAD(f), s, c);
-
-		_x = x;
-		_y = y;
-
-		x = (_x * c) - (_y * s);
-		y = (_x * s) + (_y * c);
+		return rhs / lhs;
 	}
 
-	FORCEINLINE float DotProduct(const Vector& a, const Vector& b)
-	{
-		return (a.x * b.x + a.y * b.y + a.z * b.z);
-	}
-	//===============================================
-	inline Vector& Vector::operator=(const Vector &vOther)
-	{
-		CHECK_VALID(vOther);
-		x = vOther.x; y = vOther.y; z = vOther.z;
-		return *this;
-	}
-	//===============================================
-	inline float& Vector::operator[](int i)
-	{
-		Assert((i >= 0) && (i < 3));
-		return ((float*)this)[i];
-	}
-	//===============================================
-	inline float Vector::operator[](int i) const
-	{
-		Assert((i >= 0) && (i < 3));
-		return ((float*)this)[i];
-	}
-	//===============================================
-	inline bool Vector::operator==(const Vector& src) const
-	{
-		CHECK_VALID(src);
-		CHECK_VALID(*this);
-		return (src.x == x) && (src.y == y) && (src.z == z);
-	}
-	//===============================================
-	inline bool Vector::operator!=(const Vector& src) const
-	{
-		CHECK_VALID(src);
-		CHECK_VALID(*this);
-		return (src.x != x) || (src.y != y) || (src.z != z);
-	}
-	//===============================================
-	__forceinline void VectorCopy(const Vector& src, Vector& dst)
-	{
-		CHECK_VALID(src);
-		dst.x = src.x;
-		dst.y = src.y;
-		dst.z = src.z;
-	}
-	//===============================================
-	__forceinline  Vector& Vector::operator+=(const Vector& v)
-	{
-		CHECK_VALID(*this);
-		CHECK_VALID(v);
-		x += v.x; y += v.y; z += v.z;
-		return *this;
-	}
-	//===============================================
-	__forceinline  Vector& Vector::operator-=(const Vector& v)
-	{
-		CHECK_VALID(*this);
-		CHECK_VALID(v);
-		x -= v.x; y -= v.y; z -= v.z;
-		return *this;
-	}
-	//===============================================
-	__forceinline  Vector& Vector::operator*=(float fl)
-	{
-		x *= fl;
-		y *= fl;
-		z *= fl;
-		CHECK_VALID(*this);
-		return *this;
-	}
-	//===============================================
-	__forceinline  Vector& Vector::operator*=(const Vector& v)
-	{
-		CHECK_VALID(v);
-		x *= v.x;
-		y *= v.y;
-		z *= v.z;
-		CHECK_VALID(*this);
-		return *this;
-	}
-	//===============================================
-	__forceinline Vector&	Vector::operator+=(float fl)
-	{
-		x += fl;
-		y += fl;
-		z += fl;
-		CHECK_VALID(*this);
-		return *this;
-	}
-	//===============================================
-	__forceinline Vector&	Vector::operator-=(float fl)
-	{
-		x -= fl;
-		y -= fl;
-		z -= fl;
-		CHECK_VALID(*this);
-		return *this;
-	}
-	//===============================================
-	__forceinline  Vector& Vector::operator/=(float fl)
-	{
-		Assert(fl != 0.0f);
-		float oofl = 1.0f / fl;
-		x *= oofl;
-		y *= oofl;
-		z *= oofl;
-		CHECK_VALID(*this);
-		return *this;
-	}
-	//===============================================
-	__forceinline  Vector& Vector::operator/=(const Vector& v)
-	{
-		CHECK_VALID(v);
-		Assert(v.x != 0.0f && v.y != 0.0f && v.z != 0.0f);
-		x /= v.x;
-		y /= v.y;
-		z /= v.z;
-		CHECK_VALID(*this);
-		return *this;
-	}
-	//===============================================
-	inline float Vector::Length(void) const
-	{
-		CHECK_VALID(*this);
-
-		float root = 0.0f;
-
-		float sqsr = x*x + y*y + z*z;
-
-		__asm
-		{
-			sqrtss xmm0, sqsr
-			movss root, xmm0
-		}
-
-		return root;
-	}
-	//===============================================
-	inline float Vector::Length2D(void) const
-	{
-		CHECK_VALID(*this);
-
-		float root = 0.0f;
-
-		float sqst = x*x + y*y;
-
-		__asm
-		{
-			sqrtss xmm0, sqst
-			movss root, xmm0
-		}
-
-		return root;
-	}
-	//===============================================
-	inline float Vector::Length2DSqr(void) const
-	{
-		return (x*x + y*y);
-	}
 	//===============================================
 	inline Vector CrossProduct(const Vector& a, const Vector& b)
 	{
@@ -391,137 +317,7 @@ void inline SinCos(float radians, float sine, float cosine)
 	}
 
 
-
-	//===============================================
-	float Vector::DistToSqr(const Vector &vOther) const
-	{
-		Vector delta;
-
-		delta.x = x - vOther.x;
-		delta.y = y - vOther.y;
-		delta.z = z - vOther.z;
-
-		return delta.LengthSqr();
-	}
-	inline Vector Vector::NormalizeVec()
-	{
-		Vector& vecIn = *this;
-		for (int axis = 0; axis < 3; ++axis)
-		{
-			while (vecIn[axis] > 180.f)
-				vecIn[axis] -= 360.f;
-
-			while (vecIn[axis] < -180.f)
-				vecIn[axis] += 360.f;
-
-		}
-
-		vecIn[2] = 0.f;
-		return vecIn;
-	}
-	//===============================================
-	inline float Vector::NormalizeInPlace()
-	{
-		Vector& v = *this;
-
-		float iradius = 1.f / (this->Length() + 1.192092896e-07F); //FLT_EPSILON
-
-		v.x *= iradius;
-		v.y *= iradius;
-		v.z *= iradius;
-
-		return iradius;
-
-	}
-	//===============================================
-	inline float VectorNormalize(Vector& v)
-	{
-		Assert(v.IsValid());
-		float l = v.Length();
-		if (l != 0.0f)
-		{
-			v /= l;
-		}
-		else
-		{
-			// FIXME: 
-			// Just copying the existing implemenation; shouldn't res.z == 0?
-			v.x = v.y = 0.0f; v.z = 1.0f;
-		}
-		return l;
-	}
-	//===============================================
-	FORCEINLINE float VectorNormalize(float * v)
-	{
-		return VectorNormalize(*(reinterpret_cast< Vector * >(v)));
-	}
-	//===============================================
-	inline Vector Vector::operator+(const Vector& v) const
-	{
-		Vector res;
-		res.x = x + v.x;
-		res.y = y + v.y;
-		res.z = z + v.z;
-		return res;
-	}
-
-	//===============================================
-	inline Vector Vector::operator-(const Vector& v) const
-	{
-		Vector res;
-		res.x = x - v.x;
-		res.y = y - v.y;
-		res.z = z - v.z;
-		return res;
-	}
-	//===============================================
-	inline Vector Vector::operator*(float fl) const
-	{
-		Vector res;
-		res.x = x * fl;
-		res.y = y * fl;
-		res.z = z * fl;
-		return res;
-	}
-	//===============================================
-	inline Vector Vector::operator*(const Vector& v) const
-	{
-		Vector res;
-		res.x = x * v.x;
-		res.y = y * v.y;
-		res.z = z * v.z;
-		return res;
-	}
-	//===============================================
-	inline Vector Vector::operator/(float fl) const
-	{
-		Vector res;
-		res.x = x / fl;
-		res.y = y / fl;
-		res.z = z / fl;
-		return res;
-	}
-	//===============================================
-	inline Vector Vector::operator/(const Vector& v) const
-	{
-		Vector res;
-		res.x = x / v.x;
-		res.y = y / v.y;
-		res.z = z / v.z;
-		return res;
-	}
-	inline float Vector::Dot(const Vector& vOther) const
-	{
-		const Vector& a = *this;
-
-		return(a.x*vOther.x + a.y*vOther.y + a.z*vOther.z);
-	}
-	inline float Vector::Dots(const float* fOther) const
-	{
-		const Vector& a = *this;
-
-		return(a.x*fOther[0] + a.y*fOther[1] + a.z*fOther[2]);
-	}
+	
 	inline float VectorLength(const Vector& v)
 	{
 		CHECK_VALID(v);
@@ -576,14 +372,7 @@ void inline SinCos(float radians, float sine, float cosine)
 		c.z = a.z - b.z;
 	}
 
-	inline float* Vector::Base()
-	{
-		return (float*)this;
-	}
-	inline float const* Vector::Base() const
-	{
-		return (float const*)this;
-	}
+	
 	class __declspec(align(16)) VectorAligned : public Vector
 	{
 	public:
@@ -636,22 +425,25 @@ struct cplane_t {
 
 };
 
-class matrix3x4_t {
+class matrix3x4_t
+{
 public:
 	matrix3x4_t() {}
 	matrix3x4_t(
 		float m00, float m01, float m02, float m03,
 		float m10, float m11, float m12, float m13,
-		float m20, float m21, float m22, float m23) {
-		m_flMatVal[0][0] = m00;	m_flMatVal[0][1] = m01; m_flMatVal[0][2] = m02; m_flMatVal[0][3] = m03;
-		m_flMatVal[1][0] = m10;	m_flMatVal[1][1] = m11; m_flMatVal[1][2] = m12; m_flMatVal[1][3] = m13;
-		m_flMatVal[2][0] = m20;	m_flMatVal[2][1] = m21; m_flMatVal[2][2] = m22; m_flMatVal[2][3] = m23;
+		float m20, float m21, float m22, float m23)
+	{
+		m_flMatVal[0][0] = m00; m_flMatVal[0][1] = m01; m_flMatVal[0][2] = m02; m_flMatVal[0][3] = m03;
+		m_flMatVal[1][0] = m10; m_flMatVal[1][1] = m11; m_flMatVal[1][2] = m12; m_flMatVal[1][3] = m13;
+		m_flMatVal[2][0] = m20; m_flMatVal[2][1] = m21; m_flMatVal[2][2] = m22; m_flMatVal[2][3] = m23;
 	}
 	//-----------------------------------------------------------------------------
 	// Creates a matrix where the X axis = forward
 	// the Y axis = left, and the Z axis = up
 	//-----------------------------------------------------------------------------
-	void Init(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis, const Vector &vecOrigin) {
+	void Init(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis, const Vector &vecOrigin)
+	{
 		m_flMatVal[0][0] = xAxis.x; m_flMatVal[0][1] = yAxis.x; m_flMatVal[0][2] = zAxis.x; m_flMatVal[0][3] = vecOrigin.x;
 		m_flMatVal[1][0] = xAxis.y; m_flMatVal[1][1] = yAxis.y; m_flMatVal[1][2] = zAxis.y; m_flMatVal[1][3] = vecOrigin.y;
 		m_flMatVal[2][0] = xAxis.z; m_flMatVal[2][1] = yAxis.z; m_flMatVal[2][2] = zAxis.z; m_flMatVal[2][3] = vecOrigin.z;
@@ -661,23 +453,28 @@ public:
 	// Creates a matrix where the X axis = forward
 	// the Y axis = left, and the Z axis = up
 	//-----------------------------------------------------------------------------
-	matrix3x4_t(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis, const Vector &vecOrigin) {
+	matrix3x4_t(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis, const Vector &vecOrigin)
+	{
 		Init(xAxis, yAxis, zAxis, vecOrigin);
 	}
 
-	inline void SetOrigin(Vector const & p) {
+	inline void SetOrigin(Vector const & p)
+	{
 		m_flMatVal[0][3] = p.x;
 		m_flMatVal[1][3] = p.y;
 		m_flMatVal[2][3] = p.z;
 	}
 
-	inline void Invalidate(void) {
+	inline void Invalidate(void)
+	{
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 4; j++) {
 				m_flMatVal[i][j] = std::numeric_limits<float>::infinity();;
 			}
 		}
 	}
+
+	Vector& at(int i) const { return *(Vector*)&m_flMatVal[i]; }
 
 	float *operator[](int i) { return m_flMatVal[i]; }
 	const float *operator[](int i) const { return m_flMatVal[i]; }

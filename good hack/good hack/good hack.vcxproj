@@ -118,6 +118,7 @@
     <ClInclude Include="checksum_md5.hpp" />
     <ClInclude Include="context.h" />
     <ClInclude Include="csgo.h" />
+    <ClInclude Include="drawings.h" />
     <ClInclude Include="entity.h" />
     <ClInclude Include="func_hook.h" />
     <ClInclude Include="hack.h" />
@@ -133,6 +134,7 @@
     <ClCompile Include="checksum_crc.cpp" />
     <ClCompile Include="checksum_md5.cpp" />
     <ClCompile Include="csgo.cpp" />
+    <ClCompile Include="drawings.cpp" />
     <ClCompile Include="func_hook.cpp" />
     <ClCompile Include="hack.cpp" />
     <ClCompile Include="helpers.cpp" />

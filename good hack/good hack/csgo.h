@@ -13,6 +13,9 @@ public:
 	 i_client_mode* m_clientmode;
 	 i_client* m_client;
 	 i_client_entity_list* m_entitylist;
+	 i_surface* m_surface;
+	 i_panel* m_panel;
+	 i_input* m_input;
 
 	void initialize();
 };

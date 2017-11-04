@@ -1,12 +1,11 @@
 #pragma once
 #include "netvar_manager.h"
 #include "csgo.h"
-typedef ULONG HFont;
+
 
 #define XorStr(s)(s)
 
-namespace s
-{
+
 	class c_attribute;
 	class c_grenade;
 	class c_entity;
@@ -484,9 +483,11 @@ namespace s
 			return GetFieldPointer<int>(offset);
 		}
 		c_weapon* get_active_weapon()
-		{
-			static int m_hActiveWeapon = GET_NETVAR(XorStr("DT_BaseCombatCharacter"), XorStr("m_hActiveWeapon"));
-			return (c_weapon*)g_csgo.m_entitylist->get_entity_handle(GetFieldValue<c_base_handle>(m_hActiveWeapon));
+		{	\
+			//index: 262
+			//ref: [%s]->Weapon_GetActiveSlot()
+			typedef c_weapon* (__thiscall* OriginalFn)(void*);
+			return g_utils::get_v_func<OriginalFn>(this, 262)(this);
 		}
 		c_weapon* get_weapon(void)
 		{
@@ -997,4 +998,3 @@ namespace s
 			return g_utils::get_v_func<void(__thiscall*)(void*, const char*, base_attribute*)>(this, 242)(this, Filename, Weapon);
 		}
 	};
-}

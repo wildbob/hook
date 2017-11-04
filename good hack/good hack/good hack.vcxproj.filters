@@ -57,6 +57,9 @@
     <ClInclude Include="math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="drawings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="csgo.cpp">
@@ -90,6 +93,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="func_hook.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="drawings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
