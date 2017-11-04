@@ -1,9 +1,11 @@
 #include <process.h>
 #include "csgo.h"
-
+#include "hooks.h"
 
 void cheat_init(PVOID pParam)
 {
+	g_utils::GetHandleSafe("serverbrowser.dll");
+
 	AllocConsole();
 	freopen("CONIN$", "r", stdin);
 	freopen("CONOUT$", "w", stdout);
@@ -12,6 +14,7 @@ void cheat_init(PVOID pParam)
 	SetConsoleTitle("good hack");
 
 	g_csgo.initialize();
+	g_hooks::initialize();
 }
 
 BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)

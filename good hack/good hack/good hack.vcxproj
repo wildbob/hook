@@ -114,14 +114,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="checksum_crc.hpp" />
+    <ClInclude Include="checksum_md5.hpp" />
+    <ClInclude Include="context.h" />
     <ClInclude Include="csgo.h" />
+    <ClInclude Include="entity.h" />
+    <ClInclude Include="func_hook.h" />
+    <ClInclude Include="hack.h" />
     <ClInclude Include="helpers.h" />
+    <ClInclude Include="hooks.h" />
     <ClInclude Include="interfaces.h" />
+    <ClInclude Include="math.h" />
+    <ClInclude Include="netvar_manager.h" />
     <ClInclude Include="vector.h" />
+    <ClInclude Include="visual.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="checksum_crc.cpp" />
+    <ClCompile Include="checksum_md5.cpp" />
     <ClCompile Include="csgo.cpp" />
+    <ClCompile Include="func_hook.cpp" />
+    <ClCompile Include="hack.cpp" />
+    <ClCompile Include="helpers.cpp" />
+    <ClCompile Include="hooks.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="math.cpp" />
+    <ClCompile Include="netvar_manager.cpp" />
+    <ClCompile Include="visual.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
