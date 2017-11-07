@@ -3,6 +3,7 @@
 #include "csgo.h"
 #include "hack.h"
 #include "entity.h"
+#include "menu.h"
 
 namespace g_hooks
 {
@@ -91,8 +92,21 @@ namespace g_hooks
 		static auto ofunc = panel_hook.get_original<paint_traverse_t>(41);
 		ofunc(thisptr, VGUIPanel, forceRepaint, allowForce);
 
+
 		if (!strcmp("MatSystemTopPanel", g_csgo.m_panel->get_name(VGUIPanel)))
 		{
+
+			static bool init = false;
+			if (!init)
+			{
+				g_menu = new c_menu();
+				init = true;
+			}
+
+
+			if (g_menu)
+				g_menu->main_window->Draw();
+
 			for (auto& hacks : g_hacks.m_hacks)
 			{
 				hacks->draw();

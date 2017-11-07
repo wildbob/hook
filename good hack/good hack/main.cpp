@@ -1,6 +1,7 @@
 #include <process.h>
 #include "csgo.h"
 #include "hooks.h"
+#include "drawings.h"
 
 void cheat_init(PVOID pParam)
 {
@@ -14,6 +15,7 @@ void cheat_init(PVOID pParam)
 	SetConsoleTitle("good hack");
 
 	g_csgo.initialize();
+	g_drawings.setup_fonts();
 	g_hooks::initialize();
 }
 
